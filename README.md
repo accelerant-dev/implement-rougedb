@@ -19,5 +19,6 @@ your executable can talk to a working Redis server.
 | `rcom-1-ping-only/` | A crate that generates an executable that can send a PING request to a Redis server listening on `tcp://localhost:6379` |
 | `rcom-2-conf/` | Same as `rcom-1-ping-only/`, but with a configuration object |
 | `rcom-3-multiple-cmds/` | Your utility can now accept multiple commands. |
+| `rcom-4-add-host/` | You can now specify a hostname and port from the command-line. |
 | `scripts/serve` | Runs `redis-server` in the foreground. Requires that you already have `redis-server` installed. |
 | `scripts/serve-from-docker` | Runs `redis-server` in a container. The container will stop and remove the container when the script terminates. |
