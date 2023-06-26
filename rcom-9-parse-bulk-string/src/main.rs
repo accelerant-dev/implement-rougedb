@@ -195,13 +195,10 @@ impl RedisMessage {
                     )
                 })?;
 
-                let mut bytes_read = 0;
-                while bytes_read < bytes_to_read {
+                for _ in 0..bytes_to_read {
                     if let Some(byte) = bytes.next() {
-                        payload.push(*byte)
+                        payload.push(*byte);
                     };
-
-                    bytes_read += 1;
                 }
 
                 RedisMessage::BulkString(payload)

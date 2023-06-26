@@ -144,7 +144,7 @@ enum RedisMessage {
     // Array(Vec<RedisMessage>),
     BulkString(Vec<u8>),
     Error(String),
-    // Integer(i64),
+    Integer(i64),
     SimpleString(Vec<u8>),
 }
 
@@ -175,6 +175,25 @@ impl RedisMessage {
                 let payload = String::from_utf8_lossy(&payload);
                 RedisMessage::Error(payload.to_string())
             }
+            Some(b':') => {
+                let mut number = Vec::with_capacity(16);
+                loop {
+                    match (bytes.next(), bytes.peek()) {
+                        (None, _) => break,
+                        (Some(b'\r'), Some(b'\n')) => break,
+                        (Some(&byte), _) => number.push(byte),
+                    }
+                }
+                let number = String::from_utf8_lossy(&number);
+                let number = number.parse::<i64>().map_err(|_err| {
+                    std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        format!("{number} is not a number"),
+                    )
+                })?;
+
+                RedisMessage::Integer(number)
+            }
             Some(b'$') => {
                 let mut header = Vec::with_capacity(16);
                 loop {
@@ -195,13 +214,10 @@ impl RedisMessage {
                     )
                 })?;
 
-                let mut bytes_read = 0;
-                while bytes_read < bytes_to_read {
+                for _ in 0..bytes_to_read {
                     if let Some(byte) = bytes.next() {
-                        payload.push(*byte)
+                        payload.push(*byte);
                     };
-
-                    bytes_read += 1;
                 }
 
                 RedisMessage::BulkString(payload)
@@ -226,6 +242,7 @@ impl Display for RedisMessage {
                 }?;
             }
             RedisMessage::Error(payload) => eprintln!("{payload}"),
+            RedisMessage::Integer(payload) => println!("{payload}"),
         }
 
         Ok(())
