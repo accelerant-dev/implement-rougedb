@@ -1,6 +1,9 @@
 # implement-rougedb
 
-Code for the course **Implement RougeDB: A Redis clone from outer space written in Rust**.
+Code for the course **Implement RougeDB: A Redis clone from outer space written
+in Rust**.
+
+[![](implement-rougedb-cover.png)](https://learning.accelerant.dev/implement-rougedb)
 
 ## How to use this repository
 
