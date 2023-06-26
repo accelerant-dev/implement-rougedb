@@ -142,7 +142,7 @@ impl Config {
 #[derive(Debug)]
 enum RedisMessage {
     // Array(Vec<RedisMessage>),
-    // BulkString(Vec<u8>),
+    BulkString(Vec<u8>),
     Error(String),
     // Integer(i64),
     SimpleString(Vec<u8>),
@@ -174,6 +174,30 @@ impl RedisMessage {
 
                 let payload = String::from_utf8_lossy(&payload);
                 RedisMessage::Error(payload.to_string())
+            },
+            Some(b'$') => {
+                let mut header = Vec::with_capacity(16);
+                loop {
+                    match (bytes.next(), bytes.peek()) {
+                        (None, _) => break,
+                        (Some(b'\r'), Some(b'\n')) => break,
+                        (Some(&byte), _) => header.push(byte),
+                    }
+                }
+                let header = String::from_utf8_lossy(&header);
+                let bytes_to_read = header.parse::<usize>()
+                    .expect("unable to determine number of bytes to read");
+
+                let mut bytes_read = 0;
+                while bytes_read < bytes_to_read {
+                    if let Some(byte) = bytes.next() {
+                        payload.push(*byte)
+                    };
+
+                    bytes_read += 1;
+                }
+
+                RedisMessage::BulkString(payload)
             }
             Some(_) => todo!(),
             None => todo!(),
@@ -186,7 +210,7 @@ impl RedisMessage {
 impl Display for RedisMessage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            RedisMessage::SimpleString(payload) => {
+            RedisMessage::SimpleString(payload) | RedisMessage::BulkString(payload) => {
                 match std::str::from_utf8(&payload) {
                     Ok(response) => writeln!(f, "{}", &response),
                     Err(_invalid_utf8) => {
