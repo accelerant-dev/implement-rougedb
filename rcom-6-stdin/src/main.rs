@@ -154,9 +154,9 @@ fn main() -> std::io::Result<()> {
     let mut buffer = [0; 512];
     stream.read(&mut buffer[..])?;
 
-    match  std::str::from_utf8(&buffer){
+    match std::str::from_utf8(&buffer) {
         Ok(response) => println!("{}", &response),
-        Err(_invalid_utf8) => std::io::stdout().write_all(&buffer)?
+        Err(_invalid_utf8) => std::io::stdout().write_all(&buffer)?,
     };
 
     Ok(())
