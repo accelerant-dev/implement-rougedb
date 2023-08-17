@@ -93,11 +93,14 @@ impl Config {
                     server = s["--server=".len()..].to_string();
                     pos += i * 2 - 1;
                 }
-                Some(s) if s == "-h" || s == "--help" => {
-                    usage();
-                }
                 Some(_) => continue,
                 None => todo!(),
+            }
+        }
+
+        for arg in &args {
+            if arg == "-h" || arg == "--help" {
+                usage();
             }
         }
 
