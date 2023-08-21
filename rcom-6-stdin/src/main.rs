@@ -106,6 +106,12 @@ impl Config {
             }
         }
 
+        for arg in &args {
+            if arg == "-h" || arg == "--help" {
+                usage();
+            }
+        }
+
         let mut buffer = Vec::new();
         if use_stdin {
             let mut stdin = std::io::stdin();
