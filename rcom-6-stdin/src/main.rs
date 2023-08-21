@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use std::net::TcpStream;
 use std::str;
 
-static USAGE: &'static str = "
+static USAGE: &str = "
 rcom: command-line communicator for Redis-compatible databases
 
 Usage:
