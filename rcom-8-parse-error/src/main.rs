@@ -144,7 +144,7 @@ enum RedisMessage {
     // Array(Vec<RedisMessage>),
     // BulkString(Vec<u8>),
     Error(String),
-    // Integer(i64),
+    Integer(i64),
     SimpleString(Vec<u8>),
 }
 
@@ -158,23 +158,36 @@ impl RedisMessage {
                 while let Some(byte) = bytes.next() {
                     match (*byte, bytes.peek()) {
                         (b'\r', Some(b'\n')) => break,
-                        _ => payload.push(*byte)
+                        _ => payload.push(*byte),
                     }
                 }
 
                 RedisMessage::SimpleString(payload)
-            },
+            }
             Some(b'-') => {
                 while let Some(byte) = bytes.next() {
                     match (*byte, bytes.peek()) {
                         (b'\r', Some(b'\n')) => break,
-                        _ => payload.push(*byte)
+                        _ => payload.push(*byte),
                     }
                 }
 
                 let payload = String::from_utf8_lossy(&payload);
                 RedisMessage::Error(payload.to_string())
             }
+            Some(b':') => {
+                while let Some(byte) = bytes.next() {
+                    match (*byte, bytes.peek()) {
+                        (b'\r', Some(b'\n')) => break,
+                        _ => payload.push(*byte),
+                    }
+                }
+
+                let payload = String::from_utf8_lossy(&payload);
+                let n: i64 = payload.parse().unwrap();
+                RedisMessage::Integer(n)
+            }
+
             Some(_) => todo!(),
             None => todo!(),
         };
@@ -189,13 +202,12 @@ impl Display for RedisMessage {
             RedisMessage::SimpleString(payload) => {
                 match std::str::from_utf8(&payload) {
                     Ok(response) => writeln!(f, "{}", &response),
-                    Err(_invalid_utf8) => {
-                        std::io::stdout()
-                            .write_all(&payload)
-                            .map_err(|_err| std::fmt::Error)
-                    },
+                    Err(_invalid_utf8) => std::io::stdout()
+                        .write_all(&payload)
+                        .map_err(|_err| std::fmt::Error),
                 }?;
-            },
+            }
+            RedisMessage::Integer(payload) => writeln!(f, "{}", payload)?,
             RedisMessage::Error(payload) => eprintln!("{payload}"),
         }
 
