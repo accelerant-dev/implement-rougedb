@@ -176,18 +176,11 @@ impl RedisMessage {
                 RedisMessage::Error(payload.to_string())
             }
             Some(b':') => {
-                while let Some(byte) = bytes.next() {
-                    match (*byte, bytes.peek()) {
-                        (b'\r', Some(b'\n')) => break,
-                        _ => payload.push(*byte),
-                    }
-                }
-
-                let payload = String::from_utf8_lossy(&payload);
-                let n: i64 = payload.parse().unwrap();
-                RedisMessage::Integer(n)
+                todo!("integers")
+            },
+            Some(b'$') => {
+                todo!("bulk strings")
             }
-
             Some(_) => todo!(),
             None => todo!(),
         };

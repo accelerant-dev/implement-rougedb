@@ -166,6 +166,15 @@ impl RedisMessage {
 
                 RedisMessage::SimpleString(payload)
             },
+            Some(b'-') => {
+                todo!("errors")
+            }
+            Some(b':') => {
+                todo!("integers")
+            },
+            Some(b'$') => {
+                todo!("bulk strings")
+            }
             Some(_) => todo!(),
             None => todo!(),
         };
